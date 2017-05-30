@@ -20,7 +20,6 @@ var logger = new (winston.Logger)({
     })
   ]
 });
-logger.info('Data to log.');
 var ipaddress = "0.0.0.0";
 var port = 1234;
 
@@ -33,6 +32,7 @@ var server = http.createServer(function(request, response) {
 
 
     process.on('uncaughtException', function(err) {
+        logger.error("Encountered uncaught Exception: %s", err)
         response.end("Exception");
     });
 
@@ -58,22 +58,28 @@ var server = http.createServer(function(request, response) {
                         'op': 'authdone',
                         'accessToken': accessToken
                     };
-                    logger.info(msg);
                     if (clients[uuId] != undefined || clients[uuId] != null) {
                         clients[uuId].send(JSON.stringify(msg), {
                             mask: false
                         });
                         delete clients[uuId];
+                        logger.info("Sending accessToken %s to client with uuid %s", accessToken, uuId);
                         response.end('{"status":"OK"}');
-
-                    } else
+                    } else{
+                        logger.info("Received invalid uuid (%s) in /auth", uuId)
                         response.end('{"status":"NOK"}');
+                    }
                 });
-            } else
-                response.end('{"status":"NOK"}');
-        } else
-            response.end("NOT Supported");
+            } else{
+              logger.info("Received request for invalid url %s", url);
+              response.end('{"status":"NOK"}');
+            }
+        } else{
+          logger.info("Received request with invalid method %s", request.method)
+          response.end("NOT Supported");
+        }
     } catch (e) {
+        logger.error("Caught exception: %s", e)
         response.end("Exception");
     }
 }).listen(port, ipaddress);
@@ -89,7 +95,7 @@ var clients = {};
 
 wss.on('connection', function connection(ws) {
     ws.on('message', function incoming(message) {
-        logger.info('received: %s', message);
+        logger.info('Received: %s from client', message);
         var obj = JSON.parse(message);
         if (obj.op == 'hello') {
             var uuidToken = uuidV1();
@@ -101,6 +107,9 @@ wss.on('connection', function connection(ws) {
             ws.send(JSON.stringify(hello), {
                 mask: false
             });
+            logger.info('Sent token %s to client', uuidToken);
         }
     });
 });
+
+logger.info('Started server');
