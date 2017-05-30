@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/niclabs/adkintun-login-websocket#readme",
   "dependencies": {
+    "uuid": "^3.0.1",
     "ws": "^3.0.0"
   }
 }

@@ -1,8 +1,8 @@
 var http = require("http");
 var WebSocketServer = require('ws').Server
-var uuid = require('node-uuid');
+const uuidV1 = require('uuid/v1');
 
-var ipaddress = "SERVER_IP";
+var ipaddress = "0.0.0.0";
 var port = 1234;
 
 var server = http.createServer(function(request, response) {
@@ -50,13 +50,13 @@ var server = http.createServer(function(request, response) {
                     } else
                         response.end('{"status":"NOK"}');
                 });
-            } else 
+            } else
                 response.end('{"status":"NOK"}');
-        } else 
+        } else
             response.end("NOT Supported");
-    } catch (e) 
+    } catch (e) {
         response.end("Exception");
-
+    }
 }).listen(port, ipaddress);
 
 var wss = new WebSocketServer({
@@ -73,7 +73,7 @@ wss.on('connection', function connection(ws) {
         console.log('received: %s', message);
         var obj = JSON.parse(message);
         if (obj.op == 'hello') {
-            var uuidToken = uuid.v1();
+            var uuidToken = uuidV1();
             clients[uuidToken] = ws;
             var hello = {
                 op: 'hello',
