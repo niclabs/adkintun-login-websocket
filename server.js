@@ -1,7 +1,22 @@
 var http = require("http");
 var WebSocketServer = require('ws').Server
 const uuidV1 = require('uuid/v1');
-
+var winston = require('winston');
+var logger = new (winston.Logger)({
+  transports: [
+    new (winston.transports.File, { filename: 'tmp/login-ws-adk.log' })({
+      timestamp: function() {
+        return Date.now();
+      },
+      formatter: function(options) {
+        // Return string will be passed to logger.
+        return options.timestamp() +' '+ options.level.toUpperCase() +' '+ (options.message ? options.message : '') +
+          (options.meta && Object.keys(options.meta).length ? '\n\t'+ JSON.stringify(options.meta) : '' );
+      }
+    })
+  ]
+});
+logger.info('Data to log.');
 var ipaddress = "0.0.0.0";
 var port = 1234;
 
@@ -25,21 +40,21 @@ var server = http.createServer(function(request, response) {
                 var body = '';
                 request.on('data', function(chunk) {
                     body += chunk.toString();
-                    console.log(body);
+                    logger.info(body);
                 });
 
                 request.on('end', function() {
                     var params = JSON.parse(body);
                     var uuId = params["uuid"];
                     var accessToken = params["access_token"];
-                    console.log(params);
-                    console.log(accessToken);
+                    logger.info(params);
+                    logger.info(accessToken);
 
                     var msg = {
                         'op': 'authdone',
                         'accessToken': accessToken
                     };
-                    console.log(msg);
+                    logger.info(msg);
                     if (clients[uuId] != undefined || clients[uuId] != null) {
                         clients[uuId].send(JSON.stringify(msg), {
                             mask: false
@@ -70,7 +85,7 @@ var clients = {};
 
 wss.on('connection', function connection(ws) {
     ws.on('message', function incoming(message) {
-        console.log('received: %s', message);
+        logger.info('received: %s', message);
         var obj = JSON.parse(message);
         if (obj.op == 'hello') {
             var uuidToken = uuidV1();
