@@ -2,17 +2,21 @@ var http = require("http");
 var WebSocketServer = require('ws').Server
 const uuidV1 = require('uuid/v1');
 var winston = require('winston');
+var dateFormat = require('dateformat');
+
 var logger = new (winston.Logger)({
   transports: [
-    new (winston.transports.File, { filename: 'tmp/login-ws-adk.log' })({
+    new (winston.transports.File)({
+      filename: 'tmp/login-ws-adk.log',
       timestamp: function() {
-        return Date.now();
+        return dateFormat(new Date(), "dd-mm-yyyy HH:MM:ss.l");
       },
       formatter: function(options) {
         // Return string will be passed to logger.
-        return options.timestamp() +' '+ options.level.toUpperCase() +' '+ (options.message ? options.message : '') +
+        return options.timestamp() +': '+ options.level.toUpperCase() +' -- '+ (options.message ? options.message : '') +
           (options.meta && Object.keys(options.meta).length ? '\n\t'+ JSON.stringify(options.meta) : '' );
-      }
+      },
+      json: false
     })
   ]
 });

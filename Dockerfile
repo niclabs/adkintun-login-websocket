@@ -6,11 +6,13 @@ WORKDIR /usr/src/app
 
 # Install app dependencies
 COPY package.json /usr/src/app/
-RUN cd /usr/src/app/ && npm install
+RUN cd /usr/src/app/ && \
+	mkdir tmp && touch tmp/login-ws-adk.log && \
+	 npm install
+
 
 # Bundle app source
 COPY . /usr/src/app
 
-EXPOSE 9090
 CMD [ "npm", "start" ]
 
