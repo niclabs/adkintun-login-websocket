@@ -18,8 +18,10 @@ function build {
 function run {
     # Run server docker
     port='9090'
-    docker run --name login-ws-adk -v $(pwd)/tmp:/usr/src/app/tmp -p $port:1234 \
-    -v /etc/localtime:/etc/localtime:ro --restart=unless-stopped --log-opt max-size=50m -d login-ws-adk
+    docker run --name login-ws-adk \
+    -v $(pwd)/tmp:/usr/src/app/tmp -p $port:1234 \
+    -v /etc/localtime:/etc/localtime:ro --restart=unless-stopped \
+    -u $(id -u):$(id -g) --log-opt max-size=50m -d login-ws-adk
 }
 
 function stop {

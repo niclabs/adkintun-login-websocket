@@ -10,9 +10,9 @@ RUN cd /usr/src/app/ && \
 	mkdir tmp && touch tmp/login-ws-adk.log && \
 	 npm install
 
-
 # Bundle app source
 COPY . /usr/src/app
 
+USER node
 CMD [ "npm", "start" ]
 
